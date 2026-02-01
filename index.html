@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#7c5cff" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+<title>Tashu JEE Dashboard (Offline)</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#121826;
+      --muted:#9aa4b2;
+      --text:#e6edf3;
+      --accent:#7c5cff;
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --line:rgba(255,255,255,.08);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:var(--sans);
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(124,92,255,.28), transparent 60%),
+                  radial-gradient(900px 500px at 100% 0%, rgba(34,197,94,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,20,.75);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .top{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .brand h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+    .brand .sub{color:var(--muted);font-size:12px}
+    .tabs{display:flex; gap:8px; flex-wrap:wrap}
+    .tab{
+      border:1px solid var(--line); background:rgba(255,255,255,.03);
+      padding:10px 12px; border-radius:12px; cursor:pointer;
+      color:var(--muted); font-weight:600; font-size:13px;
+    }
+    .tab.active{background:rgba(124,92,255,.18); border-color:rgba(124,92,255,.35); color:var(--text)}
+    main{padding:22px 0 40px}
+    .grid{display:grid; gap:14px}
+    @media(min-width:920px){ .grid.cols2{grid-template-columns: 1.1fr .9fr} }
+    @media(min-width:920px){ .grid.cols3{grid-template-columns: 1fr 1fr 1fr} }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line); border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px 14px;
+    }
+    .card h2{margin:0 0 10px;font-size:14px}
+    .kpi{
+      display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+    }
+    .big{font-size:28px; font-weight:800; letter-spacing:.2px}
+    .muted{color:var(--muted)}
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border:1px solid var(--line); border-radius:999px;
+      background:rgba(255,255,255,.03); font-size:12px; color:var(--muted); font-weight:600;
+    }
+    .pill.ok{color:rgba(34,197,94,.95); border-color:rgba(34,197,94,.35); background:rgba(34,197,94,.10)}
+    .pill.warn{color:rgba(245,158,11,.95); border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.10)}
+    .pill.bad{color:rgba(239,68,68,.95); border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.10)}
+    .bar{
+      width:100%; height:10px; border-radius:999px; background:rgba(255,255,255,.06);
+      border:1px solid var(--line); overflow:hidden;
+    }
+    .bar > div{height:100%; width:0%; background:linear-gradient(90deg, rgba(124,92,255,.9), rgba(34,197,94,.85));}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .btn{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--text); font-weight:700; font-size:13px;
+      padding:10px 12px; border-radius:12px; cursor:pointer;
+    }
+    .btn.primary{background:rgba(124,92,255,.18); border-color:rgba(124,92,255,.35)}
+    .btn.danger{background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.35)}
+    .btn:active{transform:translateY(1px)}
+    .checklist{display:grid; gap:10px}
+    .item{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+      border:1px solid var(--line); border-radius:14px;
+      padding:10px 10px; background:rgba(255,255,255,.02);
+    }
+    .item label{display:flex; gap:10px; cursor:pointer; width:100%}
+    input[type="checkbox"]{transform:scale(1.1); margin-top:2px}
+    .small{font-size:12px;color:var(--muted)}
+    .split{display:grid; gap:14px}
+    @media(min-width:920px){ .split{grid-template-columns:1fr 1fr} }
+    .list{margin:0; padding-left:18px; color:var(--muted); font-size:13px}
+    .list li{margin:6px 0}
+    .qbox{border:1px solid var(--line); border-radius:14px; padding:12px; background:rgba(255,255,255,.02)}
+    .qmeta{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+    .qtext{white-space:pre-wrap; font-family:var(--sans); font-size:14px; line-height:1.45}
+    .input{
+      width:100%; padding:10px 12px; border-radius:12px;
+      border:1px solid var(--line); background:rgba(255,255,255,.02);
+      color:var(--text); outline:none;
+    }
+    select.input{appearance:none}
+    .two{display:grid; gap:10px}
+    @media(min-width:680px){ .two{grid-template-columns:1fr 1fr} }
+    .footer{color:var(--muted); font-size:12px; margin-top:16px}
+    code{font-family:var(--mono); font-size:12px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div class="brand">
+      <h1>JEE Dashboard (Offline) — <span id="studentName">Tashu</span></h1>
+      <div class="sub">Streak + daily plan + progress % + PYQ shuffle</div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="today">Today</button>
+      <button class="tab" data-tab="week">Week</button>
+      <button class="tab" data-tab="pyq">PYQ</button>
+      <button class="tab" data-tab="stats">Stats</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- TODAY -->
+  <section id="tab-today">
+    <div class="grid cols2">
+      <div class="card">
+        <h2>Today snapshot</h2>
+        <div class="kpi">
+          <div class="big" id="daysLeft">—</div>
+          <div class="muted">days left to exam</div>
+          <span class="pill" id="todayPill">—</span>
+        </div>
+        <div style="height:10px"></div>
+        <div class="row">
+          <span class="pill" id="streakPill">Streak: —</span>
+          <span class="pill" id="levelPill">Level: —</span>
+          <span class="pill" id="bankPill">Marks Bank: —</span>
+        </div>
+        <div style="height:12px"></div>
+        <div class="bar" title="Overall completion">
+          <div id="overallBar"></div>
+        </div>
+        <div class="row" style="margin-top:10px; justify-content:space-between">
+          <div class="small">Overall completion: <b id="overallPct">—</b> • On-track: <b id="onTrackPct">—</b></div>
+          <button class="btn primary" id="markDayDone">Mark day done ✅</button>
+        </div>
+        <div class="footer">“Done” means: Minimum Theory + PYQ quota + Night revision + Error log. You can change this in Settings.</div>
+      </div>
+
+      <div class="card">
+        <h2>Daily checklist (accountability)</h2>
+        <div class="checklist" id="dailyChecklist"></div>
+        <div class="two" style="margin-top:12px">
+          <div>
+            <label class="small">PYQs solved today</label>
+            <input class="input" id="pyqCount" type="number" min="0" placeholder="e.g., 60" />
+          </div>
+          <div>
+            <label class="small">Mistakes added (max 60/week)</label>
+            <input class="input" id="mistakeCount" type="number" min="0" placeholder="e.g., 6" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="saveToday">Save</button>
+          <button class="btn danger" id="resetToday">Reset today</button>
+          <span class="small" id="saveMsg"></span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card">
+      <h2 id="todayPlanTitle">Today plan</h2>
+      <div class="split">
+        <div>
+          <div class="small">Focus (from your weekly roadmap)</div>
+          <ul class="list" id="todayPlanBullets"></ul>
+        </div>
+        <div>
+          <div class="small">Concept Engine reminder</div>
+          <ul class="list">
+            <li><b>Physics:</b> 1 law + 1 diagram + 2 formulas</li>
+            <li><b>Chem:</b> 1 NCERT idea + 1 rule + 5 facts</li>
+            <li><b>Math:</b> 1 definition + 2 rules + 3 standard patterns</li>
+            <li><b>Then:</b> 3–5 templates → 20–30 Q per template</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WEEK -->
+  <section id="tab-week" style="display:none">
+    <div class="grid cols2">
+      <div class="card">
+        <h2>Current week (auto)</h2>
+        <div class="kpi">
+          <div class="big" id="weekTitle">—</div>
+          <span class="pill" id="weekDates">—</span>
+        </div>
+        <div class="small muted" id="weekTheme">—</div>
+        <div style="height:10px"></div>
+        <div class="bar"><div id="weekBar"></div></div>
+        <div class="row" style="margin-top:10px; justify-content:space-between">
+          <div class="small">Week completion: <b id="weekPct">—</b></div>
+          <div class="small">Wed sectional: <b id="weekWed">—</b> • Sun: <b id="weekSun">—</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Week doables (your “must finish”)</h2>
+        <ul class="list">
+          <li>1-page sheets: <b>3 Physics + 3 Chem + 2 Maths</b> (Week 4 onward target)</li>
+          <li>Template library: <b>3 templates per subject</b> minimum</li>
+          <li>Tests: <b>Wed 90-min sectional</b> + <b>Sun mock</b> + analysis</li>
+          <li>Retention: next-day wrong redo + 7th-day top-10 mistakes redo</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card">
+      <h2>Week syllabus & templates</h2>
+      <div class="split" id="weekSyllabus"></div>
+      <div style="height:10px"></div>
+      <div class="row">
+        <button class="btn" id="weekQuickAddSheet">+1 sheet</button>
+        <button class="btn" id="weekQuickAddTemplate">+1 template mastered</button>
+        <button class="btn" id="weekQuickAddSectional">Mark sectional done</button>
+        <button class="btn" id="weekQuickAddMock">Mark mock + analysis done</button>
+        <span class="small" id="weekSaveMsg"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PYQ -->
+  <section id="tab-pyq" style="display:none">
+    <div class="grid cols2">
+      <div class="card">
+        <h2>PYQ shuffler (offline)</h2>
+        <div class="two">
+          <div>
+            <label class="small">Subject</label>
+            <select class="input" id="pyqSubject"></select>
+          </div>
+          <div>
+            <label class="small">Focus tag (optional)</label>
+            <select class="input" id="pyqTag"></select>
+          </div>
+        </div>
+        <div class="two" style="margin-top:10px">
+          <div>
+            <label class="small">Year range</label>
+            <div class="row">
+              <input class="input" style="flex:1" id="yearFrom" type="number" min="2002" max="2025" placeholder="2002" />
+              <input class="input" style="flex:1" id="yearTo" type="number" min="2002" max="2025" placeholder="2025" />
+            </div>
+          </div>
+          <div>
+            <label class="small">Keyword (optional)</label>
+            <input class="input" id="pyqKeyword" placeholder="e.g., KVL / lens / entropy" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="nextQ">Next question 🎲</button>
+          <button class="btn" id="revealSource">Show meta</button>
+          <span class="small" id="pyqCountInfo"></span>
+        </div>
+        <div class="footer">Tip: For Week 4, pick Physics + “Electrostatics/Capacitors” tag or type keyword like <code>KVL</code>, <code>capacitor</code>, <code>Kc</code>.</div>
+      </div>
+
+      <div class="card">
+        <h2>Question</h2>
+        <div class="qbox">
+          <div class="qmeta" id="qmeta"></div>
+          <div class="qtext" id="qtext">Pick filters and click “Next question”.</div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="markSolved">Solved ✅</button>
+          <button class="btn" id="markWrong">Wrong ❌</button>
+          <button class="btn" id="copyQ">Copy</button>
+          <span class="small" id="pyqActionMsg"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="tab-stats" style="display:none">
+    <div class="grid cols3">
+      <div class="card">
+        <h2>Streak</h2>
+        <div class="big" id="streakBig">—</div>
+        <div class="small muted">consecutive “day done” days</div>
+      </div>
+      <div class="card">
+        <h2>PYQ volume</h2>
+        <div class="big" id="pyqBig">—</div>
+        <div class="small muted">total PYQs logged as solved</div>
+      </div>
+      <div class="card">
+        <h2>Accuracy</h2>
+        <div class="big" id="accBig">—</div>
+        <div class="small muted">solved / (solved + wrong)</div>
+      </div>
+    </div>
+
+    <div style="height:14px"></div>
+
+    <div class="card">
+      <h2>Export / Import (for backup or sharing with you)</h2>
+      <div class="row">
+        <button class="btn" id="exportBtn">Export JSON</button>
+        <button class="btn" id="importBtn">Import JSON</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none" />
+        <span class="small muted" id="exportMsg"></span>
+      </div>
+      <div class="footer">Everything is stored in your browser’s <b>localStorage</b>. Export occasionally so nothing is lost.</div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="tab-settings" style="display:none">
+    <div class="card">
+      <h2>Settings</h2>
+      <div class="two">
+        <div>
+          <label class="small">Student name</label>
+          <input class="input" id="setName" placeholder="Tashu" />
+        </div>
+        <div>
+          <label class="small">Exam date</label>
+          <input class="input" id="setExam" type="date" />
+        </div>
+      </div>
+      <div class="two" style="margin-top:10px">
+        <div>
+          <label class="small">Daily minimum PYQs (for streak)</label>
+          <input class="input" id="setMinPyq" type="number" min="0" />
+        </div>
+        <div>
+          <label class="small">Plan start (Week 4 start)</label>
+          <input class="input" id="setPlanStart" type="date" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" id="saveSettings">Save settings</button>
+        <button class="btn danger" id="factoryReset">Factory reset</button>
+        <span class="small" id="settingsMsg"></span>
+      </div>
+      <div class="footer">
+        If you open this file on another device, use Export/Import to transfer progress.
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const DATA = window.TASHU_APP_DATA;
+  const LS_KEY = 'tashu_jee_dashboard_v1';
+
+  const $ = (id)=>document.getElementById(id);
+  const todayISO = ()=> new Date().toISOString().slice(0,10);
+
+  function loadState(){
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      try{ return JSON.parse(raw); }catch(e){}
+    }
+    // default state
+    return {
+      settings: {
+        studentName: DATA.config.studentName,
+        examDate: DATA.config.examDate,
+        planStart: DATA.config.planStart,
+        minPyq: DATA.config.dailyMinimum.minPyq
+      },
+      days: {},   // date -> {checks:{}, pyqCount, mistakes, done}
+      weekProgress: {}, // weekNo -> {sheets, templates, sectionalDone, mockDone}
+      pyqLog: { solvedIds: [], wrongIds: [] }
+    };
+  }
+  function saveState(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+  function parseDate(s){ return new Date(s+'T00:00:00'); }
+  function daysBetween(a,b){ return Math.ceil((b-a)/(1000*60*60*24)); }
+  function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+
+  function getWeekForDate(dateStr, state){
+    const d = parseDate(dateStr);
+    // find week whose start<=d<=end
+    for(const w of DATA.weeks){
+      const ws = parseDate(w.start), we = parseDate(w.end);
+      if(d>=ws && d<=we) return w;
+    }
+    // before plan start -> first week
+    const planStart = parseDate(state.settings.planStart);
+    if(d < planStart) return DATA.weeks[0];
+    // after end -> last
+    return DATA.weeks[DATA.weeks.length-1];
+  }
+
+  function getWeekNoForDate(dateStr, state){
+    return getWeekForDate(dateStr, state).week;
+  }
+
+  function getOrInitToday(state){
+    const d = todayISO();
+    if(!state.days[d]){
+      state.days[d] = {
+        checks: { theory:false, pyq:false, night:false, error:false },
+        pyqCount: 0,
+        mistakes: 0,
+        done: false
+      };
+    }
+    return state.days[d];
+  }
+
+  function computeStreak(state){
+    // streak counts consecutive days with day.done=true ending today
+    let streak=0;
+    let d = new Date();
+    while(true){
+      const key = d.toISOString().slice(0,10);
+      if(state.days[key] && state.days[key].done){ streak++; }
+      else break;
+      d.setDate(d.getDate()-1);
+    }
+    return streak;
+  }
+
+  function computeBankAndLevel(state){
+    // Rough: Bank points = sum of (week completion % * marksBankGoal) for weeks in DATA.weeks where goal>0
+    let bank=0;
+    for(const w of DATA.weeks){
+      if(!w.marksBankGoal) continue;
+      const wp = state.weekProgress[w.week] || {sheets:0,templates:0,sectionalDone:false,mockDone:false};
+      const pct = weekCompletionPct(w, wp);
+      bank += (pct/100) * w.marksBankGoal;
+    }
+    bank = Math.round(bank);
+    let levelName='Level 0';
+    for(const lvl of DATA.config.levels){
+      if(bank >= lvl.range[0] && bank < lvl.range[1]) levelName = lvl.name;
+      if(bank >= DATA.config.levels[DATA.config.levels.length-1].range[1]) levelName = DATA.config.levels[DATA.config.levels.length-1].name;
+    }
+    return {bank, levelName};
+  }
+
+  function weekCompletionPct(weekObj, wp){
+    // Target per week: sheets 8, templates 9, sectional 1, mock 1
+    const sheetsTarget = (weekObj.week>=4 && weekObj.week<=10) ? 8 : 2; // for mock weeks, don't force 8
+    const templatesTarget = (weekObj.week>=4 && weekObj.week<=10) ? 9 : 2;
+    const sectionalTarget = (weekObj.week>=4 && weekObj.week<=10) ? 1 : 0;
+    const mockTarget = (weekObj.week>=4 && weekObj.week<=10) ? 1 : (weekObj.week===11 ? 3 : 0);
+
+    let score=0, total=0;
+
+    total += sheetsTarget; score += clamp(wp.sheets||0,0,sheetsTarget);
+    total += templatesTarget; score += clamp(wp.templates||0,0,templatesTarget);
+
+    if(sectionalTarget){
+      total += 1; score += wp.sectionalDone ? 1 : 0;
+    }
+    if(mockTarget){
+      total += mockTarget; score += clamp(wp.mockDoneCount|| (wp.mockDone?1:0), 0, mockTarget);
+    }
+    if(total===0) return 100;
+    return Math.round(100 * (score/total));
+  }
+
+  function overallCompletionPct(state){
+    // Overall: average across weeks in plan window + daily done rate
+    const planWeeks = DATA.weeks.filter(w => w.week>=4);
+    let sum=0;
+    for(const w of planWeeks){
+      const wp = state.weekProgress[w.week] || {sheets:0,templates:0,sectionalDone:false,mockDone:false};
+      sum += weekCompletionPct(w, wp);
+    }
+    const weekAvg = sum / planWeeks.length;
+
+    // daily core completion since planStart: done days / elapsed days
+    const planStart = parseDate(state.settings.planStart);
+    const now = parseDate(todayISO());
+    const elapsed = Math.max(1, daysBetween(planStart, new Date(now.getTime()+24*3600*1000))); // inclusive-ish
+    let doneCount=0;
+    for(let i=0;i<elapsed;i++){
+      const d = new Date(planStart.getTime()); d.setDate(d.getDate()+i);
+      const key = d.toISOString().slice(0,10);
+      if(state.days[key] && state.days[key].done) doneCount++;
+    }
+    const dailyPct = 100 * (doneCount/elapsed);
+
+    const overall = Math.round(0.7*weekAvg + 0.3*dailyPct);
+    return {overall, weekAvg:Math.round(weekAvg), dailyPct:Math.round(dailyPct)};
+  }
+
+  function onTrackPct(state){
+    const start = parseDate(state.settings.planStart);
+    const exam = parseDate(state.settings.examDate);
+    const now = parseDate(todayISO());
+    const total = Math.max(1, daysBetween(start, exam));
+    const elapsed = clamp(daysBetween(start, now), 0, total);
+    return Math.round(100 * (elapsed/total));
+  }
+
+  function buildDailyChecklist(state){
+    const day = getOrInitToday(state);
+    const items = [
+      {key:'theory', label:'Minimum Theory (MT) done', hint:'Physics 1 law+diagram+2 formulas • Chem 1 NCERT idea+1 rule+5 facts • Math 1 def+2 rules+3 patterns'},
+      {key:'pyq', label:`PYQs solved ≥ ${state.settings.minPyq}`, hint:'Do template-wise (20–30 each).'},
+      {key:'night', label:'Night revision (15–20 min)', hint:'Formula recall + quick mistakes review.'},
+      {key:'error', label:'Error log updated', hint:'Write ONLY pattern + fix. Short.'}
+    ];
+    const wrap = $('dailyChecklist');
+    wrap.innerHTML='';
+    for(const it of items){
+      const div=document.createElement('div');
+      div.className='item';
+      div.innerHTML = `
+        <label>
+          <input type="checkbox" ${day.checks[it.key]?'checked':''} data-check="${it.key}">
+          <div>
+            <div><b>${it.label}</b></div>
+            <div class="small">${it.hint}</div>
+          </div>
+        </label>
+      `;
+      wrap.appendChild(div);
+    }
+    wrap.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const k = cb.getAttribute('data-check');
+        day.checks[k]=cb.checked;
+        // auto-check PYQ if pyqCount meets
+        day.checks.pyq = (Number(day.pyqCount||0) >= Number(state.settings.minPyq||0)) || day.checks.pyq;
+        saveState(state);
+        render(state);
+      });
+    });
+
+    $('pyqCount').value = day.pyqCount || 0;
+    $('mistakeCount').value = day.mistakes || 0;
+    $('pyqCount').oninput = (e)=>{
+      day.pyqCount = Number(e.target.value||0);
+      day.checks.pyq = day.pyqCount >= Number(state.settings.minPyq||0);
+    };
+    $('mistakeCount').oninput = (e)=>{ day.mistakes = Number(e.target.value||0); };
+  }
+
+  function canMarkDone(day, state){
+    const minPyqOk = Number(day.pyqCount||0) >= Number(state.settings.minPyq||0);
+    return !!(day.checks.theory && minPyqOk && day.checks.night && day.checks.error);
+  }
+
+  function markDayDone(state){
+    const day = getOrInitToday(state);
+    day.checks.pyq = Number(day.pyqCount||0) >= Number(state.settings.minPyq||0);
+    day.done = canMarkDone(day, state);
+    saveState(state);
+    render(state);
+  }
+
+  function resetToday(state){
+    const key=todayISO();
+    delete state.days[key];
+    saveState(state);
+    render(state);
+  }
+
+  function buildTodayPlan(state){
+    const key=todayISO();
+    const wk = getWeekForDate(key, state);
+    $('todayPlanTitle').textContent = `Today plan • Week ${wk.week}: ${wk.theme}`;
+    const ul=$('todayPlanBullets'); ul.innerHTML='';
+    const d = new Date();
+    const dow = d.getDay(); // 0 Sun ... 6 Sat
+    const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow];
+
+    // day logic
+    let bullets=[];
+    if(wk.week===11){
+      if(dayName==='Tue' || dayName==='Thu' || dayName==='Sun') bullets.push('Full mock (180 min) + 3-hour analysis');
+      else bullets.push('Only error-log fixes + redo wrong patterns (no new syllabus).');
+    }else if(wk.week===12){
+      bullets.push('NCERT highlights (Chem) + formula sheets (Phy/Math).');
+      bullets.push('Redo wrong questions only. Sleep & calm.');
+    }else{
+      if(dayName==='Wed'){
+        bullets.push(`90-min sectional test: ${wk.wedSectional}`);
+        bullets.push('After test: write Top-10 mistake patterns (20 min).');
+      }else if(dayName==='Sun'){
+        bullets.push(`${wk.sunMock}: Full mock (180 min) + analysis (patterns only).`);
+      }else{
+        bullets.push('Mon–Sat rhythm: Minimum Theory → templates → drills.');
+      }
+    }
+
+    // add week-specific
+    bullets.push('This week focus:');
+    for(const [subj, obj] of Object.entries(wk.subjects)){
+      const ch = (obj.chapters||[]).slice(0,3).join(' • ');
+      if(ch) bullets.push(`${subj}: ${ch}`);
+    }
+
+    for(const b of bullets){
+      const li=document.createElement('li'); li.textContent=b; ul.appendChild(li);
+    }
+
+    $('todayPill').textContent = `${dayName} • Week ${wk.week}`;
+  }
+
+  function renderWeek(state){
+    const wk = getWeekForDate(todayISO(), state);
+    $('weekTitle').textContent = `Week ${wk.week}`;
+    $('weekDates').textContent = `${wk.start} → ${wk.end}`;
+    $('weekTheme').textContent = wk.theme;
+    $('weekWed').textContent = wk.wedSectional || '—';
+    $('weekSun').textContent = wk.sunMock || '—';
+
+    const wp = state.weekProgress[wk.week] || {sheets:0,templates:0,sectionalDone:false,mockDone:false,mockDoneCount:0};
+    const pct = weekCompletionPct(wk, wp);
+    $('weekPct').textContent = pct + '%';
+    $('weekBar').style.width = pct + '%';
+
+    const container = $('weekSyllabus');
+    container.innerHTML='';
+    for(const [subj, obj] of Object.entries(wk.subjects)){
+      const div=document.createElement('div');
+      div.className='qbox';
+      const chapters = (obj.chapters||[]).map(x=>`<li>${x}</li>`).join('');
+      const temps = (obj.templates||[]).map(x=>`<li>${x}</li>`).join('');
+      div.innerHTML = `
+        <div class="qmeta">
+          <span class="pill">${subj}</span>
+          ${subj!=='All' ? `<span class="pill">Sheets target: ${wk.week>=4 && wk.week<=10 ? '8/wk' : '—'}</span>` : ''}
+        </div>
+        <div class="small muted"><b>Chapters</b></div>
+        <ul class="list">${chapters || '<li>—</li>'}</ul>
+        <div class="small muted"><b>Templates</b></div>
+        <ul class="list">${temps || '<li>—</li>'}</ul>
+      `;
+      container.appendChild(div);
+    }
+
+    $('weekQuickAddSheet').onclick = ()=>{
+      const w = state.weekProgress[wk.week] || {sheets:0,templates:0,sectionalDone:false,mockDone:false,mockDoneCount:0};
+      w.sheets = (w.sheets||0)+1;
+      state.weekProgress[wk.week]=w; saveState(state); $('weekSaveMsg').textContent='Saved.'; render(state);
+      setTimeout(()=>$('weekSaveMsg').textContent='',800);
+    };
+    $('weekQuickAddTemplate').onclick = ()=>{
+      const w = state.weekProgress[wk.week] || {sheets:0,templates:0,sectionalDone:false,mockDone:false,mockDoneCount:0};
+      w.templates = (w.templates||0)+1;
+      state.weekProgress[wk.week]=w; saveState(state); $('weekSaveMsg').textContent='Saved.'; render(state);
+      setTimeout(()=>$('weekSaveMsg').textContent='',800);
+    };
+    $('weekQuickAddSectional').onclick = ()=>{
+      const w = state.weekProgress[wk.week] || {sheets:0,templates:0,sectionalDone:false,mockDone:false,mockDoneCount:0};
+      w.sectionalDone = true;
+      state.weekProgress[wk.week]=w; saveState(state); $('weekSaveMsg').textContent='Sectional marked.'; render(state);
+      setTimeout(()=>$('weekSaveMsg').textContent='',900);
+    };
+    $('weekQuickAddMock').onclick = ()=>{
+      const w = state.weekProgress[wk.week] || {sheets:0,templates:0,sectionalDone:false,mockDone:false,mockDoneCount:0};
+      // Week 11: count 3 mocks
+      if(wk.week===11){
+        w.mockDoneCount = (w.mockDoneCount||0)+1;
+      }else{
+        w.mockDone = true;
+      }
+      state.weekProgress[wk.week]=w; saveState(state); $('weekSaveMsg').textContent='Mock marked.'; render(state);
+      setTimeout(()=>$('weekSaveMsg').textContent='',900);
+    };
+  }
+
+  function renderStats(state){
+    $('streakBig').textContent = computeStreak(state);
+    $('pyqBig').textContent = state.pyqLog.solvedIds.length;
+    const total = state.pyqLog.solvedIds.length + state.pyqLog.wrongIds.length;
+    const acc = total ? Math.round(100*state.pyqLog.solvedIds.length/total) : 0;
+    $('accBig').textContent = acc + '%';
+
+    $('exportBtn').onclick = ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download = `tashu_jee_dashboard_backup_${todayISO()}.json`;
+      a.click();
+      $('exportMsg').textContent='Exported.';
+      setTimeout(()=>$('exportMsg').textContent='',1000);
+    };
+    $('importBtn').onclick = ()=> $('importFile').click();
+    $('importFile').onchange = async (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const txt = await file.text();
+      try{
+        const incoming = JSON.parse(txt);
+        saveState(incoming);
+        location.reload();
+      }catch(err){
+        $('exportMsg').textContent='Invalid JSON.';
+      }
+    };
+  }
+
+  // PYQ engine
+  let currentQ = null;
+
+  function unique(arr){
+    return Array.from(new Set(arr)).sort();
+  }
+  function buildPyqFilters(){
+    const subjects = unique(DATA.pyqs.map(q=>q.subject));
+    const subjSel = $('pyqSubject');
+    subjSel.innerHTML = subjects.map(s=>`<option value="${s}">${s}</option>`).join('');
+    subjSel.value = 'Physics';
+
+    // tags built per subject (dynamic)
+    function refreshTags(){
+      const s = subjSel.value;
+      const tags = unique(DATA.pyqs.filter(q=>q.subject===s).flatMap(q=>q.tags||[]));
+      const tagSel = $('pyqTag');
+      tagSel.innerHTML = `<option value="">(any)</option>` + tags.map(t=>`<option value="${t}">${t}</option>`).join('');
+    }
+    subjSel.onchange = refreshTags;
+    refreshTags();
+  }
+
+  function filterQuestions(){
+    const subj = $('pyqSubject').value;
+    const tag = $('pyqTag').value;
+    const yFrom = Number($('yearFrom').value || 2002);
+    const yTo = Number($('yearTo').value || 2025);
+    const kw = ($('pyqKeyword').value || '').trim().toLowerCase();
+
+    let qs = DATA.pyqs.filter(q=>{
+      if(q.subject!==subj) return false;
+      if(q.year<yFrom || q.year>yTo) return false;
+      if(tag && !(q.tags||[]).includes(tag)) return false;
+      if(kw && !(q.text||'').toLowerCase().includes(kw)) return false;
+      return true;
+    });
+    $('pyqCountInfo').textContent = `${qs.length} questions match`;
+    return qs;
+  }
+
+  function renderQuestion(q){
+    if(!q){
+      $('qmeta').innerHTML='';
+      $('qtext').textContent='No question found for these filters.';
+      return;
+    }
+    const pills = [
+      `<span class="pill">${q.subject}</span>`,
+      `<span class="pill">${q.topic}</span>`,
+      `<span class="pill">${q.year} • ${q.shift}</span>`
+    ];
+    if(q.tags && q.tags.length){
+      pills.push(...q.tags.slice(0,3).map(t=>`<span class="pill ok">${t}</span>`));
+    }
+    $('qmeta').innerHTML = pills.join('');
+    $('qtext').textContent = q.text;
+  }
+
+  function nextQuestion(state){
+    const qs = filterQuestions();
+    if(qs.length===0){
+      renderQuestion(null); return;
+    }
+    // prefer unseen questions
+    const seen = new Set([...state.pyqLog.solvedIds, ...state.pyqLog.wrongIds]);
+    let pool = qs.filter(q=>!seen.has(q.id));
+    if(pool.length===0) pool = qs; // recycle
+    const q = pool[Math.floor(Math.random()*pool.length)];
+    currentQ = q;
+    renderQuestion(q);
+    $('pyqActionMsg').textContent='';
+  }
+
+  function addToLog(state, kind){
+    if(!currentQ) return;
+    const id = currentQ.id;
+    // remove from opposite
+    state.pyqLog.solvedIds = state.pyqLog.solvedIds.filter(x=>x!==id);
+    state.pyqLog.wrongIds = state.pyqLog.wrongIds.filter(x=>x!==id);
+    if(kind==='solved') state.pyqLog.solvedIds.push(id);
+    if(kind==='wrong') state.pyqLog.wrongIds.push(id);
+
+    // also increment today's PYQ count
+    const day = getOrInitToday(state);
+    day.pyqCount = Number(day.pyqCount||0) + 1;
+    day.checks.pyq = day.pyqCount >= Number(state.settings.minPyq||0);
+
+    saveState(state);
+    $('pyqActionMsg').textContent = kind==='solved' ? 'Logged as solved ✅' : 'Logged as wrong ❌';
+    render(state);
+  }
+
+  function copyCurrentQ(){
+    if(!currentQ) return;
+    navigator.clipboard.writeText(currentQ.text || '').then(()=>{
+      $('pyqActionMsg').textContent='Copied.';
+      setTimeout(()=>$('pyqActionMsg').textContent='',800);
+    });
+  }
+
+  function renderSettings(state){
+    $('setName').value = state.settings.studentName || '';
+    $('setExam').value = state.settings.examDate || '';
+    $('setPlanStart').value = state.settings.planStart || '';
+    $('setMinPyq').value = state.settings.minPyq || 0;
+
+    $('saveSettings').onclick = ()=>{
+      state.settings.studentName = $('setName').value.trim() || DATA.config.studentName;
+      state.settings.examDate = $('setExam').value || DATA.config.examDate;
+      state.settings.planStart = $('setPlanStart').value || DATA.config.planStart;
+      state.settings.minPyq = Number($('setMinPyq').value || 0);
+      saveState(state);
+      $('settingsMsg').textContent='Saved.';
+      setTimeout(()=>$('settingsMsg').textContent='',900);
+      render(state);
+    };
+
+    $('factoryReset').onclick = ()=>{
+      if(!confirm('This will erase all progress in this browser. Continue?')) return;
+      localStorage.removeItem(LS_KEY);
+      location.reload();
+    };
+  }
+
+  function render(state){
+    // header
+    $('studentName').textContent = state.settings.studentName || 'Tashu';
+
+    // days left
+    const now = parseDate(todayISO());
+    const exam = parseDate(state.settings.examDate);
+    const dl = Math.max(0, daysBetween(now, exam));
+    $('daysLeft').textContent = dl;
+
+    // streak / bank / level
+    const streak = computeStreak(state);
+    const {bank, levelName} = computeBankAndLevel(state);
+    $('streakPill').textContent = `Streak: ${streak}`;
+    $('bankPill').textContent = `Marks Bank: ${bank}`;
+    $('levelPill').textContent = `Level: ${levelName}`;
+    $('streakBig').textContent = streak;
+
+    // today done state
+    const day = getOrInitToday(state);
+    const donePossible = canMarkDone(day, state);
+    $('markDayDone').disabled = !donePossible;
+    $('markDayDone').textContent = donePossible ? 'Mark day done ✅' : 'Complete checklist to unlock ✅';
+
+    // pills
+    const pill = $('todayPill');
+    if(day.done) { pill.className='pill ok'; pill.textContent='Day done ✅'; }
+    else if(donePossible) { pill.className='pill warn'; pill.textContent='Ready to mark done'; }
+    else { pill.className='pill'; pill.textContent='In progress'; }
+
+    // overall progress
+    const {overall} = overallCompletionPct(state);
+    const onTrack = onTrackPct(state);
+    $('overallPct').textContent = overall + '%';
+    $('onTrackPct').textContent = onTrack + '%';
+    $('overallBar').style.width = overall + '%';
+
+    // daily checklist + today plan
+    buildDailyChecklist(state);
+    buildTodayPlan(state);
+
+    // set inputs
+    $('pyqCount').value = day.pyqCount || 0;
+    $('mistakeCount').value = day.mistakes || 0;
+
+    // week
+    renderWeek(state);
+
+    // stats
+    renderStats(state);
+
+    // settings
+    renderSettings(state);
+  }
+
+  // --- wire events ---
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const t = btn.getAttribute('data-tab');
+      ['today','week','pyq','stats','settings'].forEach(x=>{
+        document.getElementById('tab-'+x).style.display = (x===t) ? '' : 'none';
+      });
+    });
+  });
+
+  const state = loadState();
+
+  $('saveToday').onclick = ()=>{
+    const day = getOrInitToday(state);
+    day.pyqCount = Number($('pyqCount').value||0);
+    day.mistakes = Number($('mistakeCount').value||0);
+    day.checks.pyq = day.pyqCount >= Number(state.settings.minPyq||0);
+    saveState(state);
+    $('saveMsg').textContent='Saved.';
+    setTimeout(()=>$('saveMsg').textContent='',900);
+    render(state);
+  };
+  $('resetToday').onclick = ()=>{ resetToday(state); };
+
+  $('markDayDone').onclick = ()=>{ markDayDone(state); };
+
+  // PYQ tab
+  buildPyqFilters();
+  $('nextQ').onclick = ()=> nextQuestion(state);
+  $('markSolved').onclick = ()=> addToLog(state,'solved');
+  $('markWrong').onclick = ()=> addToLog(state,'wrong');
+  $('copyQ').onclick = copyCurrentQ;
+  $('revealSource').onclick = ()=>{
+    if(!currentQ) return;
+    alert(`ID: ${currentQ.id}\nYear: ${currentQ.year}\nShift: ${currentQ.shift}\nTopic: ${currentQ.topic}\nTags: ${(currentQ.tags||[]).join(', ') || '(none)'}`);
+  };
+
+  // initial render
+  render(state);
+
+})();
+</script>
+<script>
+  // PWA offline support
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
